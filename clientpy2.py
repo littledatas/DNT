@@ -44,22 +44,22 @@ def subscribe():
         while rline:
             s = rline.strip()
             rline = sfile.readline()
+            data = s.split(" ")
+            action = data[0]
+            ticker = data[1]
+            price = data[2]
+            shares = data[3]
+            for stock in companies:
+                if stock.getName == ticker:
+                    if action == "BUY":
+                        stock.buyStocks(shares, price)
+                    else:
+                        stock.sellStocks(shares)
     finally:
         #sock.sendall()
         sock.close()
 
 
-    data = s.parse(" ")
-    action = data[0]
-    ticker = data[1]
-    price = data[2]
-    shares = data[3]
-    for stock in companies:
-        if stock.getName == ticker:
-            if action == "BUY":
-                stock.buyStocks(shares, price)
-            else:
-                stock.sellStocks(shares)
     
 
 def init():
