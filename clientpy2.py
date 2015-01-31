@@ -81,6 +81,7 @@ def init():
         t.start()
     except (KeyboardInterrupt, SystemExit):
         t.exit()
+        run("CLOSE_CONNECTION")
         sys.exit()
 
 def updateCompanies():
