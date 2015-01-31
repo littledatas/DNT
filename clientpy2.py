@@ -32,7 +32,7 @@ def subscribe():
     print "Hi\n"
     HOST, PORT = "codebb.cloudapp.net", 17429
     s = ""
-    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n" + "\nCLOSE_CONNECTION\n"
+    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n" 
 
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,7 +50,7 @@ def subscribe():
             price = data[2]
             shares = data[3]
             for stock in companies:
-                if stock.getName == ticker:
+                if stock.getName() == ticker:
                     if action == "BUY":
                         stock.buyStocks(shares, price)
                     else:
@@ -131,18 +131,18 @@ def algo_1(): # ticker, shares, price
                 maxbids.append(B)
                 average_bid += float(B)/len(bids) + heatfunction(timep)
             maxbid  = max(maxbids)
-            print shares,maxbid
+            # print shares,maxbid
             heatbid = float(maxbid)*heatfunction(timep)
             maxbid = max(heatbid,average_bid)
             #print heatfunction(timep),shares
             buy(company.getName(),shares,maxbid) # numbers of shares is 10 
             company.setbought(True)
-            if company.getshares() > 0 or random.random() > 0.7:
+            if company.getshares() > 0 or random.random() > 0:
               
                 average_bid = 0
                 for B,S in bids:
                     average_bid += float(B)/len(bids)
-
+                print (company.getshares()*.8),average_bid*.15,"selling!"
                 sell(company.getName(),int(company.getshares()*.8),average_bid*.15)
                    
             company.addbids(bids) # need to write addbidTrend 
@@ -302,6 +302,7 @@ class Company:
     def getshares(self):
         return self.shares
     def sellStocks(self, n, price):
+        print "SELLINGS", n, price 
         if n < self.shares:
             #sell(self.getName(),n,price)
             while n > 0:
@@ -315,6 +316,7 @@ class Company:
     def buyStocks(self, num, price):
         #buy(self.getName(),num,price)
         self.shares += num
+        print "BUY STOCKS", num,price
         while num > 0:
             heapq.heappush(self.prices, price)
             num-=1
