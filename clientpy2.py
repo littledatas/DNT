@@ -119,7 +119,7 @@ def algo_1(): # ticker, shares, price
                 
             shares = 20*heatfunction(timep)
             if type(doshares(company)) is not None:
-                shares = math.max(int(doshares(company),heatfunction(timep)))*40
+                shares = max(int(doshares(company)),int(heatfunction(timep)))*40
             average_bid = 0
             for B,S in bids:
                 average_bid += float(B)/len(bids)
