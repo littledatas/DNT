@@ -60,8 +60,6 @@ def subscribe():
         sock.close()
 
 
-    
-    
 
 def init():
     raw_data = run("SECURITIES")
@@ -76,7 +74,6 @@ def init():
             i-=3
         else:
             name = data[i]
-            #mystocks.append(Stocks(name))
             net = float(data[i+1])
             ratio = float(data[i+2])
             volatility = float(data[i+3])
@@ -113,7 +110,6 @@ def algo_1(): # ticker, shares, price
     init()
     timep = 0
     while True:
-        
         timep += .01
         updateCompanies()        
         for company in companies:
@@ -141,6 +137,8 @@ def algo_1(): # ticker, shares, price
 def heatfunction(x):
     x *=-1
     return math.e**x
+
+
 def doshares(company):
     bids = company.getbids()
     if len(bids) > 4:
@@ -221,7 +219,9 @@ def cancelsell(ticket):
     print run("CLEAR_ASK "+ticker)
 
 def getCash():
-    return float(run("MY_CASH"))
+    data = run("MY_CASH").parse("  ")
+    print(data[1])
+    return float(data[1])
 
 
 class Company:
