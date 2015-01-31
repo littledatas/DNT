@@ -71,7 +71,6 @@ def init():
             i-=3
         else:
             name = data[i]
-            mystocks.append(Stocks(name))
             net = float(data[i+1])
             ratio = float(data[i+2])
             volatility = float(data[i+3])
@@ -101,7 +100,7 @@ def algo_1(): # ticker, shares, price
     init()
 
     while True:
-        time.sleep(1)
+        #time.sleep(1)
         updateCompanies()        
         for company in companies:
             bids, asks = update(company) # need to write bidding 
@@ -109,14 +108,29 @@ def algo_1(): # ticker, shares, price
                 average_bid = 0
                 for B,S in bids:
                     average_bid += float(B)/len(bids)
-                buy(company.getName(),10,average_bid) # numbers of shares is 10 
+                buy(company.getName(),20,average_bid) # numbers of shares is 10 
                 company.setbought(True)
             if company.getbought():
-                sell(company.getName(),10,1.25*10) # need to write get shares and getBought
+                sell(company.getName(),20,1.25*10) # need to write get shares and getBought
                    
             company.addbids(bids) # need to write addbidTrend 
             company.addasks(asks) # add ask trends 
             
+def algo_db():
+    init()
+
+    while True:
+        time.sleep(1)
+        updateCompanies()
+        for company in companies:
+            bids, asks = update(company)
+            if (company.getTrendPoints() > 2) && ((float(min(asks)) - float(max(bids))) < 2):
+                buy(company.getName(),20,max(bids+0.001))
+            else:
+                if(company.getShares > 0):
+                    sell(company.getName(),company.getShares,min(ask-0.001))
+
+
 
 def update(company):
     name = company.getName()
@@ -125,6 +139,11 @@ def update(company):
     raw_data.remove('SECURITY_ORDERS_OUT')
     bids = []
     asks = []
+    if company.getbidTrend():
+        company.incTrendPoints()    
+    else:
+        company.decTrendPoints()    
+
     for x in range(0,len(raw_data)):
         if x % 4 == 0:
             types = raw_data[x]            
@@ -163,7 +182,7 @@ class Company:
     asks = []
     bought = False
     prices = []
-    
+    trendPoints = 0
     def __init__(self, n, ne, r, v):
         self.name = n
         self.net =  [ne]
@@ -190,6 +209,12 @@ class Company:
         self.ratio.append(r)
     def updateVolatility(self, v):
         self.volatility.append(v)
+    def getTrendPoints(self):
+        return self.trendPoints
+    def incTrendPoints(self):
+        self.trendPoints += 1
+    def decTrendPoints(self):
+        self.trendPoints -= 1
     def getbidTrend(self):
         last = self.bids[len(self.bids)-1]
         l = self.bids[len(self.bids)-2]
@@ -214,7 +239,7 @@ class Company:
         self.asks.append(a)
 
 
-    def sellStocks(self, n):
+    def sellStocks(self, n,price):
         if n < self.shares:
             while n > 0:
                 heapq.heappop(self.prices)
