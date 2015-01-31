@@ -113,20 +113,32 @@ def algo_1(): # ticker, shares, price
     timep = 0
     while True:
         timep += .01
-        updateCompanies()        
+        updateCompanies()  
+        # print 'testing'    
         for company in companies:
             bids, asks = update(company) # need to write bidding 
                 
-            shares = 20*heatfunction(timep)
+            shares = 40*heatfunction(timep)
+            #print shares, "Shares!!"
             if type(doshares(company)) is not None:
-                shares = max(int(doshares(company)),int(heatfunction(timep)))*40
+                max1 = (doshares(company))
+                max2 = (heatfunction(timep))
+                shares = int(max(max1,max2)*40)
+                
             average_bid = 0
+            maxbids = []
             for B,S in bids:
-                average_bid += float(B)/len(bids)
-            buy(company.getName(),shares,average_bid) # numbers of shares is 10 
+                maxbids.append(B)
+                average_bid += float(B)/len(bids) + heatfunction(timep)
+            maxbid  = max(maxbids)
+            print shares,maxbid
+            heatbid = float(maxbid)*heatfunction(timep)
+            maxbid = max(heatbid,average_bid)
+            #print heatfunction(timep),shares
+            buy(company.getName(),shares,maxbid) # numbers of shares is 10 
             company.setbought(True)
-            if company.getshares() > 0 or random.random() > 0:
-                print 'testing'
+            if company.getshares() > 0 or random.random() > 0.7:
+              
                 average_bid = 0
                 for B,S in bids:
                     average_bid += float(B)/len(bids)
