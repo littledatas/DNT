@@ -223,6 +223,7 @@ class Stocks:
             while n > 0:
                 heapq.heappop(heap)
                 n-=1
+            return True
         else:
             return False
     def buyStocks(self, num, price):
