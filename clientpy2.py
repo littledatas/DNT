@@ -44,22 +44,23 @@ def subscribe():
         while rline:
             s = rline.strip()
             rline = sfile.readline()
+            data = s.split(" ")
+            action = data[0]
+            ticker = data[1]
+            price = data[2]
+            shares = data[3]
+            for stock in companies:
+                if stock.getName == ticker:
+                    if action == "BUY":
+                        stock.buyStocks(shares, price)
+                    else:
+                        stock.sellStocks(shares)
     finally:
         #sock.sendall()
         sock.close()
 
 
-    data = s.parse(" ")
-    action = data[0]
-    ticker = data[1]
-    price = data[2]
-    shares = data[3]
-    for stock in companies:
-        if stock.getName == ticker:
-            if action == "BUY":
-                stock.buyStocks(shares, price)
-            else:
-                stock.sellStocks(shares)
+    
     
 
 def init():
@@ -110,31 +111,36 @@ def updateCompanies():
 
 def algo_1(): # ticker, shares, price 
     init()
-
+    timep = 0
     while True:
         
+        timep += .01
         updateCompanies()        
         for company in companies:
             bids, asks = update(company) # need to write bidding 
-            if company.getbidTrend() > 0 or random.random() > .85: # need to write getbidTrend 
                 
-                shares = 20
-                if type(doshares(company)) is not None:
-                    shares = int(doshares(company)*40)
+            shares = 20*heatfunction(timep)
+            if type(doshares(company)) is not None:
+                shares = math.max(int(doshares(company),heatfunction(timep)))*40
+            average_bid = 0
+            for B,S in bids:
+                average_bid += float(B)/len(bids)
+            buy(company.getName(),shares,average_bid) # numbers of shares is 10 
+            company.setbought(True)
+            if company.getshares() > 0 or random.random() > 0:
+                print 'testing'
                 average_bid = 0
                 for B,S in bids:
                     average_bid += float(B)/len(bids)
-                buy(company.getName(),shares,average_bid) # numbers of shares is 10 
-                company.setbought(True)
-            if company.getshares() > 0 or random.random() > .5:
-                average_bid = 0
-                for B,S in bids:
-                    average_bid += float(B)/len(bids)
-                sell(company.getName(),int(company.getshares()*.8),average_bid*1.15)
+
+                sell(company.getName(),int(company.getshares()*.8),average_bid*.15)
                    
             company.addbids(bids) # need to write addbidTrend 
             company.addasks(asks) # add ask trends 
- 
+
+def heatfunction(x):
+    x *=-1
+    return math.e**x
 def doshares(company):
     bids = company.getbids()
     if len(bids) > 4:
@@ -148,7 +154,7 @@ def doshares(company):
         avgbid4 = avgbid(bids4)
         avg5 = 0
         if len(bids4) > 4:
-            last = bids[len(ids)-1]
+            last = bids[len(bids)-1]
             l = bids[len(bids)-2]
             Bla = []
             Bl = []
