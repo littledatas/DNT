@@ -3,6 +3,7 @@ import sys
 import time
 import math
 import heapq
+import threading
 
 companies = []
 mystocks = []
@@ -27,8 +28,9 @@ def run(*commands):
     return string;
 
 def subscribe():
+    print "Hi\n"
     HOST, PORT = "codebb.cloudapp.net", 17429
-    
+    s = ""
     data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n"
 
     try:
@@ -39,10 +41,24 @@ def subscribe():
         sfile = sock.makefile()
         rline = sfile.readline()
         while rline:
-            print(rline.strip())
+            s = rline.strip()
             rline = sfile.readline()
     finally:
         sock.close()
+
+    data = s.parse(" ")
+    action = data[0]
+    ticker = data[1]
+    price = data[2]
+    shares = data[3]
+    for stock in mystocks:
+        if stock.getName == ticker:
+            if action == "BUY":
+                stock.buyStocks(shares, price)
+            else:
+                stock.sellStocks(shares)
+    print mystocks
+    
 
 def init():
     raw_data = run("SECURITIES")
@@ -62,7 +78,9 @@ def init():
             volatility = float(data[i+3])
             companies.append(Company(name, net, ratio, volatility))
         i+=4
-   
+    t = threading.Thread(target=subscribe)
+    t.start()
+
 def updateCompanies():
     global companies
     raw_data = run("SECURITIES")
@@ -198,6 +216,8 @@ class Stocks:
     heap = []
     def __init__(self, n):
         self.name = n
+    def __repr__(self):
+        return "Ticker: "+self.name+" Shares: "+number
     def sellStocks(self, n):
         if n < number:
             while n > 0:
@@ -205,10 +225,10 @@ class Stocks:
                 n-=1
         else:
             return False
-    def sellStock(self):
-        number -= 1
     def buyStocks(self, num, price):
         number += num
         while num > 0:
             heapq.heappush(price)
             num-=1
+    def getName(self):
+        return name
