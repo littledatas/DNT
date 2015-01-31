@@ -134,6 +134,8 @@ def algo_1(): # ticker, shares, price
             company.addbids(bids) # need to write addbidTrend 
             company.addasks(asks) # add ask trends 
  
+
+
 def doshares(company):
     bids = company.getbids()
     if len(bids) > 4:
@@ -147,7 +149,7 @@ def doshares(company):
         avgbid4 = avgbid(bids4)
         avg5 = 0
         if len(bids4) > 4:
-            last = bids[len(ids)-1]
+            last = bids[len(bids)-1]
             l = bids[len(bids)-2]
             Bla = []
             Bl = []
