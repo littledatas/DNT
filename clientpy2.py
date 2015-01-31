@@ -214,7 +214,9 @@ def cancelsell(ticket):
     print run("CLEAR_ASK "+ticker)
 
 def getCash():
-    return float(run("MY_CASH"))
+    data = run("MY_CASH").parse("  ")
+    print(data[1])
+    return float(data[1])
 
 
 class Company:
