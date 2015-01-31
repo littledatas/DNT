@@ -55,6 +55,8 @@ def subscribe():
                         stock.buyStocks(shares, price)
                     else:
                         stock.sellStocks(shares)
+                break
+
     finally:
         #sock.sendall()
         sock.close()
