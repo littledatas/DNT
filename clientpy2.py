@@ -71,7 +71,6 @@ def init():
             i-=3
         else:
             name = data[i]
-            mystocks.append(Stocks(name))
             net = float(data[i+1])
             ratio = float(data[i+2])
             volatility = float(data[i+3])
@@ -102,7 +101,7 @@ def algo_1(): # ticker, shares, price
 
     while True:
         time.sleep(1)
-        updateCompanies()        
+        updateCompanies()         
         for company in companies:
             bids, asks = update(company) # need to write bidding 
             if company.getbidTrend() > 0: # need to write getbidTrend 
