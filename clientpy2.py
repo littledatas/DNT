@@ -77,7 +77,11 @@ def init():
             companies.append(Company(name, net, ratio, volatility))
         i+=4
     t = threading.Thread(target=subscribe)
-    t.start()
+    try:
+        t.start()
+    except (KeyboardInterrupt, SystemExit):
+        t.exit()
+        sys.exit()
 
 def updateCompanies():
     global companies
@@ -124,11 +128,13 @@ def algo_db():
         updateCompanies()
         for company in companies:
             bids, asks = update(company)
-            if (company.getTrendPoints() > 2) && ((float(min(asks)) - float(max(bids))) < 2):
-                buy(company.getName(),20,max(bids+0.001))
+            bidPrices, bidShares = bids
+            askPrices, askShares = asks
+            if ((company.getTrendPoints() > 2) and ((float(min(askPrices)) - float(max(bidPrices))) < 2)):
+                buy(company.getName(),20,max(bidPrices+0.001))
             else:
                 if(company.getShares > 0):
-                    sell(company.getName(),company.getShares,min(ask-0.001))
+                    sell(company.getName(),company.getShares,min(askPrices-0.001))
 
 
 
