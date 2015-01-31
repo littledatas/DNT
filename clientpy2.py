@@ -54,12 +54,17 @@ def init():
             volatility = float(data[i+3])
             companies.append(Company(name, net, ratio, volatility))
         i+=4
-    print companies
+    print companies 
+    return companies
+
+def algo_1():
+    companies = init():
+
 class Company:
     name = ""
-    net = 0.0
-    ratio = 0.0
-    volatility = 0.0
+    net = 0.0 # net value 
+    ratio = 0.0 # 
+    volatility = 0.0 # 
     def __init__(self, n, ne, r, v):
         self.name = n
         self.net = ne
