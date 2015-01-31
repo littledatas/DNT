@@ -2,8 +2,10 @@ import socket
 import sys
 import time
 import math
+import heapq
 
 companies = []
+mystocks = []
 
 def run(*commands):
     HOST, PORT = "codebb.cloudapp.net", 17429
@@ -45,6 +47,7 @@ def subscribe():
 def init():
     raw_data = run("SECURITIES")
     global companies
+    global mystocks
     data = raw_data.split(" ")
     i = 0
     tickerupdate = ""
@@ -53,6 +56,7 @@ def init():
             i-=3
         else:
             name = data[i]
+            mystocks.append(Stocks(name))
             net = float(data[i+1])
             ratio = float(data[i+2])
             volatility = float(data[i+3])
@@ -72,6 +76,9 @@ def updateCompanies():
             companies[int(math.floor(i/4))].updateRatio(float(data[i+2]))
             companies[int(math.floor(i/4))].updateVolatility(float(data[i+3]))
         i+=4
+    global mycompanies
+    raw_data = run("MY_SECURITIES")
+    data
 
 def algo_1(): # ticker, shares, price 
     init()
@@ -114,6 +121,7 @@ def update(company):
 
 def buy(ticker, shares, price):
     print run("BID "+ticker+" "+str(price)+" "+str(shares))
+    
 
 def sell(ticker, shares, price):
     print run("ASK "+ticker+" "+str(price)+" "+str(shares))
@@ -123,6 +131,10 @@ def cancelbuy(ticker):
 
 def cancelsell(ticket):
     print run("CLEAR_ASK "+ticker)
+
+def getCash():
+    return float(run("MY_CASH"))
+
 
 class Company:
     name = ""
@@ -180,5 +192,23 @@ class Company:
     def addasks(self,a):
         self.asks.append(a)
 
-
-        
+class Stocks:
+    name = ""
+    number = 0
+    heap = []
+    def __init__(self, n):
+        self.name = n
+    def sellStocks(self, n):
+        if n < number:
+            while n > 0:
+                heapq.heappop(heap)
+                n-=1
+        else:
+            return False
+    def sellStock(self):
+        number -= 1
+    def buyStocks(self, num, price):
+        number += num
+        while num > 0:
+            heapq.heappush(price)
+            num-=1
