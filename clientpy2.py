@@ -140,7 +140,6 @@ def heatfunction(x):
     x *=-1
     return math.e**x
 
-
 def doshares(company):
     bids = company.getbids()
     if len(bids) > 4:
@@ -189,6 +188,15 @@ def avgbid(bids):
     return ret
 
 
+
+def sellBest():
+    mindo = 10000
+    for c in companies:
+        val = doshares(c)
+        mindo = min(mindo, val)
+    percentage = math.e**getCash()/getNetWorth()
+    
+
 def update(company):
     name = company.getName()
     raw_data = run("ORDERS " + name)
@@ -224,7 +232,6 @@ def getCash():
     data = run("MY_CASH").parse("  ")
     print(data[1])
     return float(data[1])
-
 
 class Company:
     name = ""
