@@ -65,6 +65,16 @@ class Company:
         self.net = ne
         self.ratio = r
         self.volatility = v
+    def getName(self):
+        return self.name
+    def getNet(self):
+        return self.net
+    def getRatio(self):
+        return self.ratio
+    def getVolatility(self):
+        return self.volatility
+    def __repr__(self):
+        return "Ticker: "+self.name+" Net Value: "+str(self.net)+" Ratio: "+str(self.ratio)+" Volatility: "+str(self.volatility)
 
 
     
