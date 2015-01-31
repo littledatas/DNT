@@ -158,10 +158,9 @@ class Stocks:
             while n > 0:
                 heapq.heappop(heap)
                 n-=1
+            return True
         else:
             return False
-    def sellStock(self):
-        number -= 1
     def buyStocks(self, num, price):
         number += num
         while num > 0:
