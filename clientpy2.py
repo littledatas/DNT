@@ -4,7 +4,7 @@ import time
 import math
 import heapq
 import threading
-
+import random 
 companies = []
 
 def run(*commands):
@@ -23,14 +23,16 @@ def run(*commands):
             string += rline.strip()
             rline = sfile.readline()
     finally:
+        #sock.sendall()
         sock.close()
+        
     return string;
 
 def subscribe():
     print "Hi\n"
     HOST, PORT = "codebb.cloudapp.net", 17429
     s = ""
-    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n"
+    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n" + "\nCLOSE_CONNECTION\n"
 
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,7 +45,9 @@ def subscribe():
             s = rline.strip()
             rline = sfile.readline()
     finally:
+        #sock.sendall()
         sock.close()
+
 
     data = s.parse(" ")
     action = data[0]
@@ -56,7 +60,6 @@ def subscribe():
                 stock.buyStocks(shares, price)
             else:
                 stock.sellStocks(shares)
-    print mystocks
     
 
 def init():
@@ -66,6 +69,7 @@ def init():
     data = raw_data.split(" ")
     i = 0
     tickerupdate = ""
+    print 'Data', data
     while i < len(data):
         if i == 0:
             i-=3
@@ -77,8 +81,15 @@ def init():
             companies.append(Company(name, net, ratio, volatility))
         i+=4
     t = threading.Thread(target=subscribe)
-    t.start()
-
+    try:
+        t.start()
+    except (KeyboardInterrupt, SystemExit):
+        print "Check this motha"
+        run("CLOSE_CONNECTION")
+        cleanup_stop_thread();
+       # run("CLOSE_CONNECTION")
+        sys.exit()
+    
 def updateCompanies():
     global companies
     raw_data = run("SECURITIES")
@@ -104,18 +115,72 @@ def algo_1(): # ticker, shares, price
         updateCompanies()         
         for company in companies:
             bids, asks = update(company) # need to write bidding 
-            if company.getbidTrend() > 0: # need to write getbidTrend 
+            if company.getbidTrend() > 0 or random.random() > .85: # need to write getbidTrend 
+                
+                shares = 20
+                if type(doshares(company)) is not None:
+                    shares = int(doshares(company)*40)
                 average_bid = 0
                 for B,S in bids:
                     average_bid += float(B)/len(bids)
-                buy(company.getName(),10,average_bid) # numbers of shares is 10 
+                buy(company.getName(),shares,average_bid) # numbers of shares is 10 
                 company.setbought(True)
-            if company.getbought():
-                sell(company.getName(),10,1.25*10) # need to write get shares and getBought
+            if company.getshares() > 0 or random.random() > .5:
+                average_bid = 0
+                for B,S in bids:
+                    average_bid += float(B)/len(bids)
+                sell(company.getName(),int(company.getshares()*.8),average_bid*1.15)
                    
             company.addbids(bids) # need to write addbidTrend 
             company.addasks(asks) # add ask trends 
-            
+ 
+def doshares(company):
+    bids = company.getbids()
+    if len(bids) > 4:
+        bids1 = bids[:int(len(bids)/4)]
+        bids2 = bids[int(len(bids)/4)+1:int(len(bids)/2)]
+        bids3 = bids[int(len(bids)/2)+1:int(3*len(bids)/4)]
+        bids4 = bids[int(3*len(bids)/4)+1:int(len(bids))-1]
+        avgbid1 = avgbid(bids1)
+        abgbid2 = avgbid(bids2)
+        avgbid3 = avgbid(bids3)
+        avgbid4 = avgbid(bids4)
+        avg5 = 0
+        if len(bids4) > 4:
+            last = bids[len(ids)-1]
+            l = bids[len(bids)-2]
+            Bla = []
+            Bl = []
+                       
+            if isinstance(last,list) and isinstance(l,list):
+                for B,S in last:
+                    Bla.append(float(B))
+                for B,S in l:
+                    Bl.append(float(B))
+                avg5 = max(Bla) - max(Bl)
+        if avgbid4 == 0:
+            avgbid4 = avg5*.657
+        diff = (avg5-avgbid4)/(abs(avgbid4)+1)
+        return .7+diff
+    return .5
+
+
+def avgbid(bids):
+    ret = 0
+    if isinstance(bids,list):
+        for bid in bids:
+            if isinstance(bid,int):
+                return 43 
+            Bi = []
+            for B,S in bid:
+                Bi.append(B)
+            if isinstance(Bi,list):
+                ret +=float(max(Bi))/len(bids)
+            else:
+                ret = int(random.random()*50)
+
+    return ret
+
 
 def update(company):
     name = company.getName()
@@ -211,18 +276,23 @@ class Company:
         self.bids.append(b)
     def addasks(self,a):
         self.asks.append(a)
-
-
-    def sellStocks(self, n):
+    def getbids(self):
+        return self.bids
+    def getshares(self):
+        return self.shares
+    def sellStocks(self, n, price):
         if n < self.shares:
+            #sell(self.getName(),n,price)
             while n > 0:
                 heapq.heappop(self.prices)
                 n-=1
             return True
+
         else:
             return False
         
     def buyStocks(self, num, price):
+        #buy(self.getName(),num,price)
         self.shares += num
         while num > 0:
             heapq.heappush(self.prices, price)
