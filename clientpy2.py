@@ -126,18 +126,23 @@ def algo_1(): # ticker, shares, price
 def algo_db():
     init()
     while True:
-        time.sleep(1)
+        #time.sleep(1)
         updateCompanies()
         for company in companies:
             bids, asks = update(company)
             bidPrices, bidShares = bids
             askPrices, askShares = asks
+            print "\nBidPrices: "
+            print bidPrices
+            print "\n"
             if ((company.getTrendPoints() > 2) and ((float(min(askPrices)) - float(max(bidPrices))) < 1.0)):
                 buy(company.getName(),20,min(askPrices))
+                print "\nBUYING\n"
             else:
-                if(company.getShares > 0):
+                if(company.getShares() > 0):
                     if (min(company.getPrices) < max(bidPrices))  or (min(company.getPrices)*0.8 > max(bidPrices)):
-                        sell(company.getName(),company.getShares/2,max(bidPrices))
+                        sell(company.getName(),company.getShares()/2,max(bidPrices))
+                        print "\nSELLING\n"
 
 
 
@@ -195,7 +200,7 @@ class Company:
     asks = []
     bought = False
     prices = []
-    trendPoints = 0
+    trendPoints = 3
     def __init__(self, n, ne, r, v):
         self.name = n
         self.net =  [ne]
@@ -230,6 +235,8 @@ class Company:
         self.trendPoints -= 1
     def resetTrendPoints(self):
         self.trendPoints = 0
+    def getShares(self):
+        return self.shares
     def getbidTrend(self):
         last = self.bids[len(self.bids)-1]
         l = self.bids[len(self.bids)-2]
