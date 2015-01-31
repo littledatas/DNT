@@ -68,30 +68,49 @@ def updateCompanies():
         if i == 0:
             i-=3
         else:
-            companies[math.floor(i/4)].updateNet(float(data[i+1]))
-            companies[math.floor(i/4)].updateRatio(float(data[i+2]))
-            companies[math.floor(i/4)].updateVolatility(float(data[i+3]))
+            companies[int(math.floor(i/4))].updateNet(float(data[i+1]))
+            companies[int(math.floor(i/4))].updateRatio(float(data[i+2]))
+            companies[int(math.floor(i/4))].updateVolatility(float(data[i+3]))
         i+=4
 
 def algo_1(): # ticker, shares, price 
-    
+    init()
+
     while True:
         time.sleep(1)
+        updateCompanies()        
         for company in companies:
-            bids, asks, shares,net = update(company) # need to write bidding 
-            if company.getTrend() > 0: # need to write getTrend 
-                average_bid = reduce(lambda x, y: x + y, bids) / len(bids)
-                buy(company.getName(),average_bid,shares) 
-            if company.bought > 0
-                sell(company.getName,1.25*company.getBought,shares) # need to write get shares and getBought
-        
-           
+            bids, asks = update(company) # need to write bidding 
+            if company.getbidTrend() > 0: # need to write getbidTrend 
+                average_bid = 0
+                for B,S in bids:
+                    average_bid += float(B)/len(bids)
+                buy(company.getName(),10,average_bid) # numbers of shares is 10 
+                company.setbought(True)
+            if company.getbought():
+                sell(company.getName(),10,1.25*10) # need to write get shares and getBought
+                   
+            company.addbids(bids) # need to write addbidTrend 
+            company.addasks(asks) # add ask trends 
             
-            company.addbidTrend(bids) # need to write addbidTrend 
-            company.addaskTrend(asks) # add ask trends 
-            company.addnetTrend(net) # add net Trend
 
-
+def update(company):
+    name = company.getName()
+    raw_data = run("ORDERS " + name)
+    raw_data = raw_data.split(" ")
+    raw_data.remove('SECURITY_ORDERS_OUT')
+    bids = []
+    asks = []
+    for x in range(0,len(raw_data)):
+        if x % 4 == 0:
+            types = raw_data[x]            
+            price = raw_data[x+2]
+            shares = raw_data[x+3]
+            if types == "BID":
+                bids.append((price,shares))
+            else:
+                asks.append((price,shares))
+    return bids,asks
 
 def buy(ticker, shares, price):
     print run("BID "+ticker+" "+str(price)+" "+str(shares))
@@ -109,15 +128,20 @@ class Company:
     name = ""
     net = [] # net value 
     ratio = [] # 
-    volatility = [] # 
+    volatility = [] #
+    bids = []
+    shares = []
+    asks = []
+    bought = False 
     def __init__(self, n, ne, r, v):
         self.name = n
         self.net =  [ne]
         self.ratio = [r]
         self.volatility = [v]
-        self.trend = [0]
+        self.bids = [0]
+        self.asks = [0]
         self.shares = [0]
-        self.bought = [0]
+        self.bought = False
     def getName(self):
         return self.name
     def getNet(self):
@@ -134,4 +158,27 @@ class Company:
         self.ratio.append(r)
     def updateVolatility(self, v):
         self.volatility.append(v)
+    def getbidTrend(self):
+        last = self.bids[len(self.bids)-1]
+        l = self.bids[len(self.bids)-2]
+        Bla = []
+        Bl = []
+       
+        if isinstance(last,list) and isinstance(l,list):
+            for B,S in last:
+                Bla.append(float(B))
+            for B,S in l:
+                Bl.append(float(B))
+            return max(Bla) - max(Bl)
+        print self.bids 
+    def setbought(self,v):
+        self.bought = v
+    def getbought(self):
+        return self.bought
+    def addbids(self,b):
+        self.bids.append(b)
+    def addasks(self,a):
+        self.asks.append(a)
+
+
         
