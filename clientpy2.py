@@ -217,7 +217,7 @@ class Company:
     def sellStocks(self, n):
         if n < self.shares:
             while n > 0:
-                heapq.heappop(prices)
+                heapq.heappop(self.prices)
                 n-=1
             return True
         else:
@@ -226,5 +226,5 @@ class Company:
     def buyStocks(self, num, price):
         self.shares += num
         while num > 0:
-            heapq.heappush(prices, price)
+            heapq.heappush(self.prices, price)
             num-=1
