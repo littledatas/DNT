@@ -1,6 +1,8 @@
 import socket
 import sys
-    
+
+companies = []
+
 def run(*commands):
     HOST, PORT = "codebb.cloudapp.net", 17429
     
@@ -40,10 +42,10 @@ def subscribe():
 
 def init():
     raw_data = run("SECURITIES")
+    global companies
     data = raw_data.split(" ")
     i = 0
     tickerupdate = ""
-    companies = [];
     while i < len(data):
         if i == 0:
             i-=3
@@ -54,7 +56,19 @@ def init():
             volatility = float(data[i+3])
             companies.append(Company(name, net, ratio, volatility))
         i+=4
-    print companies
+
+def buy(ticker, shares, price):
+    print run("BID "+ticker+" "+str(price)+" "+str(shares))
+
+def sell(ticker, shares, price):
+    print run("ASK "+ticker+" "+str(price)+" "+str(shares))
+
+def cancelbuy(ticker):
+    print run("CLEAR_BID "+ticker)
+
+def cancelsell(ticket):
+    print run("CLEAR_ASK "+ticker)
+
 class Company:
     name = ""
     net = 0.0
