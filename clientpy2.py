@@ -6,7 +6,6 @@ import heapq
 import threading
 
 companies = []
-mystocks = []
 
 def run(*commands):
     HOST, PORT = "codebb.cloudapp.net", 17429
@@ -51,7 +50,7 @@ def subscribe():
     ticker = data[1]
     price = data[2]
     shares = data[3]
-    for stock in mystocks:
+    for stock in companies:
         if stock.getName == ticker:
             if action == "BUY":
                 stock.buyStocks(shares, price)
@@ -160,9 +159,11 @@ class Company:
     ratio = [] # 
     volatility = [] #
     bids = []
-    shares = []
+    shares = 0
     asks = []
-    bought = False 
+    bought = False
+    prices = []
+    
     def __init__(self, n, ne, r, v):
         self.name = n
         self.net =  [ne]
@@ -170,7 +171,8 @@ class Company:
         self.volatility = [v]
         self.bids = [0]
         self.asks = [0]
-        self.shares = [0]
+        self.shares = 0
+        self.prices = []
         self.bought = False
     def getName(self):
         return self.name
@@ -181,7 +183,7 @@ class Company:
     def getVolatility(self):
         return self.volatility
     def __repr__(self):
-        return "Ticker: "+self.name+" Net Value: "+str(self.net)+" Ratio: "+str(self.ratio)+" Volatility: "+str(self.volatility)
+        return "Ticker: "+self.name+" Shares: "+number+" Net Value: "+str(self.net)+" Ratio: "+str(self.ratio)+" Volatility: "+str(self.volatility)
     def updateNet(self, ne):
         self.net.append(ne)
     def updateRatio(self, r):
@@ -200,7 +202,8 @@ class Company:
             for B,S in l:
                 Bl.append(float(B))
             return max(Bla) - max(Bl)
-        print self.bids 
+        print self.bids
+        
     def setbought(self,v):
         self.bought = v
     def getbought(self):
@@ -210,26 +213,18 @@ class Company:
     def addasks(self,a):
         self.asks.append(a)
 
-class Stocks:
-    name = ""
-    number = 0
-    heap = []
-    def __init__(self, n):
-        self.name = n
-    def __repr__(self):
-        return "Ticker: "+self.name+" Shares: "+number
+
     def sellStocks(self, n):
-        if n < number:
+        if n < self.shares:
             while n > 0:
-                heapq.heappop(heap)
+                heapq.heappop(prices)
                 n-=1
             return True
         else:
             return False
+        
     def buyStocks(self, num, price):
-        number += num
+        self.shares += num
         while num > 0:
-            heapq.heappush(price)
+            heapq.heappush(prices, price)
             num-=1
-    def getName(self):
-        return name
