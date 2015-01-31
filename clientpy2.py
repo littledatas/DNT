@@ -23,14 +23,16 @@ def run(*commands):
             string += rline.strip()
             rline = sfile.readline()
     finally:
+        #sock.sendall()
         sock.close()
+        
     return string;
 
 def subscribe():
     print "Hi\n"
     HOST, PORT = "codebb.cloudapp.net", 17429
     s = ""
-    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n"
+    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n" + "\nCLOSE_CONNECTION\n"
 
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -43,7 +45,9 @@ def subscribe():
             s = rline.strip()
             rline = sfile.readline()
     finally:
+        #sock.sendall()
         sock.close()
+
 
     data = s.parse(" ")
     action = data[0]
@@ -78,8 +82,15 @@ def init():
             companies.append(Company(name, net, ratio, volatility))
         i+=4
     t = threading.Thread(target=subscribe)
-    t.start()
-
+    try:
+        t.start()
+    except (KeyboardInterrupt, SystemExit):
+        print "Check this motha"
+        run("CLOSE_CONNECTION")
+        cleanup_stop_thread();
+       # run("CLOSE_CONNECTION")
+        sys.exit()
+    
 def updateCompanies():
     global companies
     raw_data = run("SECURITIES")
@@ -101,18 +112,21 @@ def algo_1(): # ticker, shares, price
     init()
 
     while True:
-        time.sleep(.01)
+        
         updateCompanies()        
         for company in companies:
             bids, asks = update(company) # need to write bidding 
             if company.getbidTrend() > 0 or random.random() > .85: # need to write getbidTrend 
-                shares = doshares(company)*40
+                
+                shares = 20
+                if type(doshares(company)) is not None:
+                    shares = int(doshares(company)*40)
                 average_bid = 0
                 for B,S in bids:
                     average_bid += float(B)/len(bids)
                 buy(company.getName(),shares,average_bid) # numbers of shares is 10 
                 company.setbought(True)
-            if company.getshares() > 0:
+            if company.getshares() > 0 or random.random() > .5:
                 average_bid = 0
                 for B,S in bids:
                     average_bid += float(B)/len(bids)
@@ -128,12 +142,12 @@ def doshares(company):
         bids2 = bids[int(len(bids)/4)+1:int(len(bids)/2)]
         bids3 = bids[int(len(bids)/2)+1:int(3*len(bids)/4)]
         bids4 = bids[int(3*len(bids)/4)+1:int(len(bids))-1]
-        avgbid1 = avgbid(bid1)
-        abgbid2 = avgbid(bid2)
-        avgbid3 = avgbid(bid3)
+        avgbid1 = avgbid(bids1)
+        abgbid2 = avgbid(bids2)
+        avgbid3 = avgbid(bids3)
         avgbid4 = avgbid(bids4)
         avg5 = 0
-        if len(avgbid4) > 4:
+        if len(bids4) > 4:
             last = bids[len(ids)-1]
             l = bids[len(bids)-2]
             Bla = []
@@ -145,18 +159,27 @@ def doshares(company):
                 for B,S in l:
                     Bl.append(float(B))
                 avg5 = max(Bla) - max(Bl)
-        diff = (avg5-avgbid4)/abs(avgbid4)
+        if avgbid4 == 0:
+            avgbid4 = avg5*.657
+        diff = (avg5-avgbid4)/(abs(avgbid4)+1)
         return .7+diff
+    return .5
 
 
 def avgbid(bids):
     ret = 0
     if isinstance(bids,list):
         for bid in bids:
+            if isinstance(bid,int):
+                return 43 
             Bi = []
             for B,S in bid:
                 Bi.append(B)
-            ret +=max(Bi)/len(bids)
+            if isinstance(Bi,list):
+                ret +=float(max(Bi))/len(bids)
+            else:
+                ret = int(random.random()*50)
+
     return ret
 
 
