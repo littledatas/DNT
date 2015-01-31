@@ -43,7 +43,9 @@ def subscribe():
             s = rline.strip()
             rline = sfile.readline()
     finally:
+        sock.sendall("CLOSE_CONNECTION\n");
         sock.close()
+
 
     data = s.parse(" ")
     action = data[0]
@@ -123,7 +125,6 @@ def algo_1(): # ticker, shares, price
             
 def algo_db():
     init()
-
     while True:
         time.sleep(1)
         updateCompanies()
@@ -131,11 +132,13 @@ def algo_db():
             bids, asks = update(company)
             bidPrices, bidShares = bids
             askPrices, askShares = asks
-            if ((company.getTrendPoints() > 2) and ((float(min(askPrices)) - float(max(bidPrices))) < 2)):
-                buy(company.getName(),20,max(bidPrices+0.001))
+            if ((company.getTrendPoints() > 2) and ((float(min(askPrices)) - float(max(bidPrices))) < 1.0)):
+                buy(company.getName(),20,min(askPrices))
             else:
                 if(company.getShares > 0):
-                    sell(company.getName(),company.getShares,min(askPrices-0.001))
+                    if (min(company.getPrices) < max(bidPrices))  or (min(company.getPrices)*0.8 > max(bidPrices)):
+                        sell(company.getName(),company.getShares/2,max(bidPrices))
+
 
 
 
@@ -144,23 +147,26 @@ def update(company):
     raw_data = run("ORDERS " + name)
     raw_data = raw_data.split(" ")
     raw_data.remove('SECURITY_ORDERS_OUT')
-    bids = []
-    asks = []
+    bidprices = []
+    bidshares = []
+    askprices = []
+    askshares = []
     if company.getbidTrend():
         company.incTrendPoints()    
     else:
         company.decTrendPoints()    
-
     for x in range(0,len(raw_data)):
         if x % 4 == 0:
             types = raw_data[x]            
             price = raw_data[x+2]
             shares = raw_data[x+3]
             if types == "BID":
-                bids.append((price,shares))
+                bidprices.append(price)
+                bidshares.append(shares)
             else:
-                asks.append((price,shares))
-    return bids,asks
+                askprices.append(price)
+                askshares.append(shares)
+    return (bidprices,bidshares),(askprices,askshares) 
 
 def buy(ticker, shares, price):
     print run("BID "+ticker+" "+str(price)+" "+str(shares))
@@ -222,6 +228,8 @@ class Company:
         self.trendPoints += 1
     def decTrendPoints(self):
         self.trendPoints -= 1
+    def resetTrendPoints(self):
+        self.trendPoints = 0
     def getbidTrend(self):
         last = self.bids[len(self.bids)-1]
         l = self.bids[len(self.bids)-2]
@@ -245,7 +253,8 @@ class Company:
     def addasks(self,a):
         self.asks.append(a)
 
-
+    def getPrices(self):
+        return self.prices
     def sellStocks(self, n,price):
         if n < self.shares:
             while n > 0:
@@ -254,9 +263,11 @@ class Company:
             return True
         else:
             return False
+        self.resetTrendPoints()
         
     def buyStocks(self, num, price):
         self.shares += num
         while num > 0:
             heapq.heappush(self.prices, price)
             num-=1
+        self.resetTrendPoints()
