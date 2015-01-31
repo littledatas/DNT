@@ -32,7 +32,7 @@ def subscribe():
     print "Hi\n"
     HOST, PORT = "codebb.cloudapp.net", 17429
     s = ""
-    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n" + "\nCLOSE_CONNECTION\n"
+    data= "dnt" + " " + "nishilsucks" + "\nSUBSCRIBE\n"
 
     try:
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -50,8 +50,10 @@ def subscribe():
             price = data[2]
             shares = data[3]
             for stock in companies:
-                if stock.getName == ticker:
+                if stock.getName() == ticker:
+                    print "\n\nI AM HERE BITCHES\n\n"
                     if action == "BUY":
+                        print "\n\nI AM HERE BITCHES TWO\n\n"
                         stock.buyStocks(shares, price)
                     else:
                         stock.sellStocks(shares)
